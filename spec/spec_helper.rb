@@ -1,6 +1,7 @@
 require 'prof/external_spec/spec_helper'
 require 'prof/environment/cloud_foundry'
 require 'prof/environment_manager'
+require 'hula/bosh_director'
 require 'prof/ssh_gateway'
 require 'yaml'
 require 'pry'
@@ -14,11 +15,6 @@ RELEASE_MANIFEST_PATH = '../../manifests/cf-rabbitmq.yml'
 
 def environment
   @environment ||= begin
-                     downloaded_manifest = bosh_director.download_manifest(ENV["DEPLOYMENT_NAME"])
-                     release_number = downloaded_manifest["releases"].select{|r| r["name"] == ENV["DEPLOYMENT_NAME"]}.first["version"]
-                     manifest = YAML.load_file(RELEASE_MANIFEST_PATH)
-                     manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = "denise-hack-#{release_number}"
-                     File.open(RELEASE_MANIFEST_PATH, 'w') {|file| file.write(manifest.to_yaml)}
 
                      options = {
                        bosh_manifest_path: ENV.fetch('BOSH_MANIFEST') { File.expand_path(RELEASE_MANIFEST_PATH, __FILE__) },
@@ -41,12 +37,29 @@ def environment
                        not value.nil?
                      end
 
+                     prepare_bosh_manifest options
                      Prof::Environment::CloudFoundry.new(options)
                    end
 end
 
 def bosh_director
   @bosh_director ||= environment.bosh_director
+end
+
+def prepare_bosh_manifest
+  bosh_director = Hula::BoshDirector.new(
+    target_url: options[:bosh_target] ||= "https://192.168.50.4:25555",
+    username: options[:bosh_username] ||= "admin",
+    password: options[:bosh_password] ||= "admin",
+    manifest_path: nil,
+    command_runner: Hula::CommandRunner.new,
+    logger: Logger.new('/dev/null'))
+
+  downloaded_manifest = bosh_director.download_manifest(ENV["DEPLOYMENT_NAME"])
+  release_number = downloaded_manifest["releases"].select{|r| r["name"] == ENV["DEPLOYMENT_NAME"]}.first["version"]
+  manifest = YAML.load_file(RELEASE_MANIFEST_PATH)
+  manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = "denise-hack-#{release_number}"
+  File.open(RELEASE_MANIFEST_PATH, 'w') {|file| file.write(manifest.to_yaml)}
 end
 
 def environment_manager
