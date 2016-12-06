@@ -15,7 +15,7 @@ RELEASE_MANIFEST_PATH = '../../manifests/cf-rabbitmq.yml'
 def environment
   @environment ||= begin
                      release_number = File.open('../../release-version/number', 'r') {|f| f.read.to_s}
-                     manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = release_number
+                     manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = "denise-hack"
                      File.open(RELEASE_MANIFEST_PATH, 'w') {|file| file.write(manifest.to_yaml)}
 
                      options = {
