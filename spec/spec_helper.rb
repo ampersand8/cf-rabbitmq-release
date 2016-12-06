@@ -10,10 +10,16 @@ Dir[File.expand_path('support/**/*.rb', __dir__)].each do |file|
   require file
 end
 
+RELEASE_MANIFEST_PATH = '../../manifests/cf-rabbitmq.yml'
+
 def environment
   @environment ||= begin
+                     release_number = File.open('../../release-version/number', 'r') {|f| f.read.to_s}
+                     manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = release_number
+                     File.open(RELEASE_MANIFEST_PATH, 'w') {|file| file.write(manifest.to_yaml)}
+
                      options = {
-                       bosh_manifest_path: ENV.fetch('BOSH_MANIFEST') { File.expand_path('../../manifests/cf-rabbitmq.yml', __FILE__) },
+                       bosh_manifest_path: ENV.fetch('BOSH_MANIFEST') { File.expand_path(RELEASE_MANIFEST_PATH, __FILE__) },
                        bosh_service_broker_job_name: 'cf-rabbitmq-broker'
                      }
 
