@@ -46,7 +46,7 @@ def bosh_director
   @bosh_director ||= environment.bosh_director
 end
 
-def prepare_bosh_manifest
+def prepare_bosh_manifest(options)
   bosh_director = Hula::BoshDirector.new(
     target_url: options[:bosh_target] ||= "https://192.168.50.4:25555",
     username: options[:bosh_username] ||= "admin",
