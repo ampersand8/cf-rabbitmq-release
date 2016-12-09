@@ -57,9 +57,9 @@ def prepare_bosh_manifest(options)
 
   downloaded_manifest = bosh_director.download_manifest(ENV["DEPLOYMENT_NAME"])
   release_number = downloaded_manifest["releases"].select{|r| r["name"] == ENV["DEPLOYMENT_NAME"]}.first["version"]
-  manifest = YAML.load_file(RELEASE_MANIFEST_PATH)
+  manifest = YAML.load_file(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__))
   manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = "denise-hack-#{release_number}"
-  File.open(RELEASE_MANIFEST_PATH, 'w') {|file| file.write(manifest.to_yaml)}
+  File.open(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__), 'w') {|file| file.write(manifest.to_yaml)}
 end
 
 def environment_manager
