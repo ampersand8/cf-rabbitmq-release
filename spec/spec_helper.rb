@@ -39,6 +39,7 @@ def environment
 
                      prepare_bosh_manifest options
                      Prof::Environment::CloudFoundry.new(options)
+
                    end
 end
 
@@ -59,7 +60,7 @@ def prepare_bosh_manifest(options)
   release_number = downloaded_manifest["releases"].select{|r| r["name"] == ENV["DEPLOYMENT_NAME"]}.first["version"]
   manifest = YAML.load_file(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__))
   manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = "denise-hack-#{release_number}"
-  File.open(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__), 'w') {|file| file.write(manifest.to_yaml)}
+  File.open(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__), 'w') {|file| file.write(manifest.to_yaml); file.close()}
 end
 
 def environment_manager
@@ -81,9 +82,9 @@ end
 
 def modify_and_deploy_manifest
   manifest = YAML.load_file(environment.bosh_manifest.path)
-
+  puts "Before " + manifest.to_s
   yield manifest
-
+  puts "After " + manifest.to_s
   deploy_manifest(manifest)
 end
 
