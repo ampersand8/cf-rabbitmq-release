@@ -92,7 +92,7 @@ RSpec.describe 'Using a Cloud Foundry service broker' do
       bosh_director.deploy(environment.bosh_manifest.path)
     end
 
-    it 'provides only amqp and mqtt connectivity', :pushes_cf_app do
+    it 'provides only amqp and mqtt connectivity', :pushes_cf_app, :focus => true do
       cf.push_app_and_bind_with_service(test_app, service) do |app, _|
 
         provides_amqp_connectivity(session, app)

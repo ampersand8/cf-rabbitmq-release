@@ -3,7 +3,9 @@
 main() {
   install_dependencies
   run_unit_tests
-  run_system_tests_individually_to_isolate_state
+  # run_system_tests_individually_to_isolate_state
+    bundle exec rspec spec/system/broker/service_broker_spec.rb --tag focus --fail-fast
+
   delete_bosh_deployment_to_remove_state
 }
 
