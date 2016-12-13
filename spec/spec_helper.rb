@@ -38,8 +38,17 @@ def environment
                      end
 
                      prepare_bosh_manifest options
-                     Prof::Environment::CloudFoundry.new(options)
+                     puts ENV['BOSH_MANIFEST']
+                     puts options[:bosh_manifest_path]
 
+                  puts   `grep version -C2 #{options[:bosh_manifest_path] }`
+
+                     cf = Prof::Environment::CloudFoundry.new(options)
+
+                     puts cf.bosh_manifest.path
+
+                  puts   `grep version -C2 #{cf.bosh_manifest.path }`
+                     cf
                    end
 end
 
