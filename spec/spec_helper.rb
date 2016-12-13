@@ -37,18 +37,9 @@ def environment
                        not value.nil?
                      end
 
-                     prepare_bosh_manifest options
-                     puts ENV['BOSH_MANIFEST']
-                     puts options[:bosh_manifest_path]
+                     prepare_bosh_manifest options, options[:bosh_manifest_path]
 
-                  puts   `grep version -C2 #{options[:bosh_manifest_path] }`
-
-                     cf = Prof::Environment::CloudFoundry.new(options)
-
-                     puts cf.bosh_manifest.path
-
-                  puts   `grep version -C2 #{cf.bosh_manifest.path }`
-                     cf
+                     Prof::Environment::CloudFoundry.new(options)
                    end
 end
 
@@ -56,7 +47,7 @@ def bosh_director
   @bosh_director ||= environment.bosh_director
 end
 
-def prepare_bosh_manifest(options)
+def prepare_bosh_manifest(options, dest)
   bosh_director = Hula::BoshDirector.new(
     target_url: options[:bosh_target] ||= "https://192.168.50.4:25555",
     username: options[:bosh_username] ||= "admin",
@@ -69,7 +60,7 @@ def prepare_bosh_manifest(options)
   release_number = downloaded_manifest["releases"].select{|r| r["name"] == ENV["DEPLOYMENT_NAME"]}.first["version"]
   manifest = YAML.load_file(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__))
   manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = "denise-hack-#{release_number}"
-  File.open(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__), 'w') {|file| file.write(manifest.to_yaml); file.close()}
+  File.open(dest, 'w') {|file| file.write(manifest.to_yaml)}
 end
 
 def environment_manager
