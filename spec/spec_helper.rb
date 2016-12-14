@@ -58,7 +58,7 @@ def prepare_bosh_manifest(options, dest)
 
   downloaded_manifest = bosh_director.download_manifest(ENV["DEPLOYMENT_NAME"])
   release_number = downloaded_manifest["releases"].select{|r| r["name"] == 'cf-rabbitmq'}.first["version"]
-  manifest = YAML.load_file(File.expand_path(RELEASE_MANIFEST_PATH, __FILE__))
+  manifest = YAML.load_file(dest)
   manifest["releases"].select{|r| r["name"] == "cf-rabbitmq"}.first["version"] = "#{release_number}"
   File.open(dest, 'w') {|file| file.write(manifest.to_yaml)}
 end
